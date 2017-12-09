@@ -348,10 +348,56 @@ class ShowAndTellModel(object):
 
     self.global_step = global_step
 
+  def build_input_image_embeddings(self):
+    """Builds the image model subgraph and generates image embeddings.
+
+    Inputs:
+      self.images
+
+    Outputs:
+      self.image_embeddings
+    """
+    # Map inception output into embedding space.
+    with tf.variable_scope("image_embedding") as scope:
+      '''
+      image_embeddings = tf.contrib.layers.fully_connected(
+        inputs=inception_output,
+        num_outputs=self.config.embedding_size,
+        activation_fn=None,
+        weights_initializer=self.initializer,
+        biases_initializer=None,
+        scope=scope)
+      '''
+      image_embeddings = tf.Variable(tf.random_uniform([self.config.batch_size, self.config.embedding_size]), name="image_embedding")
+
+
+    # Save the embedding size in the graph.
+    tf.constant(self.config.embedding_size, name="embedding_size")
+    self.image_embeddings = image_embeddings
+
   def build(self):
     """Creates all ops for training and evaluation."""
     self.build_inputs()
     self.build_image_embeddings()
+    self.build_seq_embeddings()
+    self.build_model()
+    self.setup_inception_initializer()
+    self.setup_global_step()
+
+  def build_vector(self):
+    self.config.batch_size = 1
+    input_feed = tf.placeholder(dtype=tf.int64,
+                                shape=[None],  # batch_size
+                                name="input_feed")
+    self.input_seqs = tf.expand_dims(input_feed, 1)
+    # An int32 Tensor with shape [batch_size, padded_length].
+    self.target_seqs = None
+
+    # An int32 0/1 Tensor with shape [batch_size, padded_length].
+    self.input_mask = None
+
+
+    self.build_input_image_embeddings()
     self.build_seq_embeddings()
     self.build_model()
     self.setup_inception_initializer()
