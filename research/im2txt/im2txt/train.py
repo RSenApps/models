@@ -107,6 +107,7 @@ def main(unused_argv):
       global_step=model.global_step,
       number_of_steps=FLAGS.number_of_steps,
       init_fn=model.init_fn,
+
       saver=saver)
 
 
