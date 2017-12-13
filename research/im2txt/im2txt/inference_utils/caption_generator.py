@@ -209,3 +209,36 @@ class CaptionGenerator(object):
       complete_captions = partial_captions
 
     return complete_captions.extract(sort=True)
+
+  def get_image_embedding(self, sess, encoded_image):
+    """Runs beam search caption generation on a single image.
+
+    Args:
+      sess: TensorFlow Session object.
+      encoded_image: An encoded image string.
+
+    Returns:
+      A list of Caption sorted by descending score.
+    """
+    # Feed in the image to get the initial state.
+    image_embedding = self.model.get_image_embedding(self.model,sess, encoded_image)
+    return image_embedding
+    '''
+    initial_beam = Caption(
+        sentence=[self.vocab.start_id],
+        state=initial_state[0],
+        logprob=0.0,
+        score=0.0,
+        metadata=[""])
+    partial_captions = TopN(self.beam_size)
+    partial_captions.push(initial_beam)
+    complete_captions = TopN(self.beam_size)
+
+    # Run beam search.
+    partial_captions_list = partial_captions.extract()
+    partial_captions.reset()
+    input_feed = np.array([c.sentence[-1] for c in partial_captions_list])
+    state_feed = np.array([c.state for c in partial_captions_list])
+
+    return self.model.get_image_embedding(self.model, sess, input_feed, state_feed)
+    '''

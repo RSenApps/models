@@ -63,6 +63,16 @@ py_library(
     ],
 )
 
+py_library(
+    name = "inference_wrapper_vector",
+    srcs = ["inference_wrapper_vector.py"],
+    srcs_version = "PY2AND3",
+    deps = [
+        ":show_and_tell_model",
+        "//im2txt/inference_utils:inference_wrapper_base",
+    ],
+)
+
 py_binary(
     name = "train",
     srcs = ["train.py"],

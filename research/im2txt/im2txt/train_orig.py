@@ -17,8 +17,8 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-import os
-import pickle
+
+
 import tensorflow as tf
 
 from im2txt import configuration
@@ -62,7 +62,7 @@ def main(unused_argv):
     # Build the model.
     model = show_and_tell_model.ShowAndTellModel(
         model_config, mode="train", train_inception=FLAGS.train_inception)
-    model.build_vector()
+    model.build()
 
     # Set up the learning rate.
     learning_rate_decay_fn = None
@@ -92,66 +92,23 @@ def main(unused_argv):
         global_step=model.global_step,
         learning_rate=learning_rate,
         optimizer=training_config.optimizer,
-        variables=[model.image_embeddings],
         clip_gradients=training_config.clip_gradients,
         learning_rate_decay_fn=learning_rate_decay_fn)
 
-
-    
-    #save_file = tf.train.latest_checkpoint(FLAGS.checkpoint_dir)
-    print('DIRECTORY', os.path.dirname(os.path.realpath(__file__)))
-    save_file = '/home/ubuntu/mnt/models/research/im2txt//model/train/model.ckpt-600000'
-    reader = tf.train.NewCheckpointReader(save_file)
-    saved_shapes = reader.get_variable_to_shape_map()
-    #var_names = sorted([(var.name, var.name.split(':')[0]) for var in tf.global_variables() if var.name.split(':')[0] in saved_shapes])
-    var_names = sorted([(var.name, var.name.split(':')[0]) for var in tf.global_variables()])
-
-    print('globals', tf.global_variables())
-    print('saved', var_names)
-    restore_vars = []
-    with tf.variable_scope('', reuse=True):
-        for var_name, saved_var_name in var_names:
-            for var in tf.global_variables():
-                if var.name == var_name:
-                    #curr_var = tf.get_variable(var_name)
-                    var_shape = var.get_shape().as_list()
-                    #print('shapes', saved_shapes.keys())
-                    if saved_var_name in saved_shapes:# and var_shape == saved_shapes[saved_var_name]:
-                        restore_vars.append(var)
-                        print('restored', var_name)
-                    break
     # Set up the Saver for saving and restoring model checkpoints.
-    # ONLY RESTORE SOME VARIABLES
-    saver = tf.train.Saver(restore_vars)
-    print('HERE')
-    #saver = tf.train.Saver(max_to_keep=training_config.max_checkpoints_to_keep)
-    #optimistic restore
-  with g.as_default():
-  	local_init_op = tf.global_variables_initializer()
+    saver = tf.train.Saver(max_to_keep=training_config.max_checkpoints_to_keep)
+
   # Run training.
-  '''tf.contrib.slim.learning.train(
+  tf.contrib.slim.learning.train(
       train_op,
       train_dir,
       log_every_n_steps=FLAGS.log_every_n_steps,
       graph=g,
       global_step=model.global_step,
       number_of_steps=FLAGS.number_of_steps,
-      # init_fn=model.init_fn,
-      local_init_op = local_init_op,
+      init_fn=model.init_fn,
       saver=saver)
-  '''
-  with tf.Session(graph = g) as sess:
-    saver.restore(sess, save_file)
-    sess.run(local_init_op)
-    for step in range(1, FLAGS.number_of_steps):
-      t, loss = sess.run([train_op, model.total_loss])
-      print("Step", step, "Loss", loss)
-    vector = sess.run([model.image_embeddings])
-    print(len(vector), vector)
-    with open('vector_for_caption', 'wb+') as fp:
-      pickle.dump(vector, fp)
-    saver = tf.train.Saver()
-    saver.save(sess, './learned_vector.ckpt')
+
 
 if __name__ == "__main__":
   tf.app.run()

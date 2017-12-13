@@ -50,7 +50,7 @@ class ModelConfig(object):
     # for differences between tokenizer versions used in preprocessing. There is
     # no harm in using a value greater than the actual vocab size, but using a
     # value less than the actual vocab size will result in an error.
-    self.vocab_size = 12000
+    self.vocab_size = 40082
 
     # Number of threads for image preprocessing. Should be a multiple of 2.
     self.num_preprocess_threads = 4
@@ -75,8 +75,8 @@ class ModelConfig(object):
     self.num_lstm_units = 512
 
     # If < 1.0, the dropout keep probability applied to LSTM variables.
-    self.lstm_dropout_keep_prob = 0.7
-
+    #self.lstm_dropout_keep_prob = 0.7
+    self.lstm_dropout_keep_prob = 1.0 
 
 class TrainingConfig(object):
   """Wrapper class for training hyperparameters."""
@@ -87,18 +87,19 @@ class TrainingConfig(object):
     self.num_examples_per_epoch = 586363
 
     # Optimizer for training the model.
-    self.optimizer = "SGD"
-
+    #self.optimizer = "SGD"
+    self.optimizer = "Adam"
     # Learning rate for the initial phase of training.
-    self.initial_learning_rate = 2.0
-    self.learning_rate_decay_factor = 0.5
-    self.num_epochs_per_decay = 8.0
+    #self.initial_learning_rate = 2.0
+    self.initial_learning_rate = .1
+    self.learning_rate_decay_factor =  0.9
+    self.num_epochs_per_decay =  .001
 
     # Learning rate when fine tuning the Inception v3 parameters.
     self.train_inception_learning_rate = 0.0005
 
     # If not None, clip gradients to this value.
-    self.clip_gradients = 5.0
+    self.clip_gradients = None #  5.0
 
     # How many model checkpoints to keep.
     self.max_checkpoints_to_keep = 5

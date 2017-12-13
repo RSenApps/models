@@ -20,12 +20,12 @@ from __future__ import print_function
 
 import math
 import os
-import pickle
+
 
 import tensorflow as tf
 
 from im2txt import configuration
-from im2txt import inference_wrapper#_vector as inference_wrapper
+from im2txt import inference_wrapper_vector as inference_wrapper
 from im2txt.inference_utils import caption_generator
 from im2txt.inference_utils import vocabulary
 
@@ -68,27 +68,18 @@ def main(_):
     # beam search parameters. See caption_generator.py for a description of the
     # available beam search parameters.
     generator = caption_generator.CaptionGenerator(model, vocab)
-    directory = './data/clothes/raw-data/train2014/'
-    filecount = 0 
-    embeddings = []
-    with open('vector_for_caption', 'wb+') as fp:
-      for filename in sorted(os.listdir(directory)):
-        print(filename)
-        #try:
-        directory="/home/ubuntu/mnt/"
-        filename = "6.819-Project/images/levis-mens-standard-denim-work-shirt.jpg"
-        if True:
-          with tf.gfile.GFile(os.path.join(directory, filename), "r") as f:
-            image = f.read()
-          image_embedding = generator.get_image_embedding(sess, image)
-          pickle.dump(image_embedding, fp)
-          embeddings.append(image_embedding)
-        #except Exception:
-        #  embeddings.append(None)
-	#pickle.dump(image_embedding, fp) #print(image_embedding)
-        filecount += 1
-        #if filecount > 10000:
-        break
-      pickle.dump(embeddings, fp)
+
+    for filename in filenames:
+      with tf.gfile.GFile(filename, "r") as f:
+        image = f.read()
+      captions = generator.beam_search(sess, image)
+      print("Captions for image %s:" % os.path.basename(filename))
+      for i, caption in enumerate(captions):
+        # Ignore begin and end words.
+        sentence = [vocab.id_to_word(w) for w in caption.sentence[1:-1]]
+        sentence = " ".join(sentence)
+        print("  %d) %s (p=%f)" % (i, sentence, math.exp(caption.logprob)))
+
+
 if __name__ == "__main__":
   tf.app.run()

@@ -87,7 +87,7 @@ class InferenceWrapperBase(object):
         directory containing a checkpoint file.
     """
     if tf.gfile.IsDirectory(checkpoint_path):
-      checkpoint_path = tf.train.latest_checkpoint(checkpoint_path)
+      checkpoint_path = tf.train.latest_checkpoint(checkpoint_path)# './learned_vector.ckpt' # tf.train.latest_checkpoint(checkpoint_path)
       if not checkpoint_path:
         raise ValueError("No checkpoint file found in: %s" % checkpoint_path)
 
@@ -113,8 +113,27 @@ class InferenceWrapperBase(object):
     """
     tf.logging.info("Building model.")
     self.build_model(model_config)
+    '''
+    save_file = './learned_vector.ckpt'
+    reader = tf.train.NewCheckpointReader(save_file)
+    saved_shapes = reader.get_variable_to_shape_map()
+    var_names = sorted([(var.name, var.name.split(':')[0]) for var in tf.global_variables()])
+    
+    restore_vars = []
+    with tf.variable_scope('', reuse=True):
+        for var_name, saved_var_name in var_names:
+            for var in tf.global_variables():
+                if var.name == var_name:
+                    #curr_var = tf.get_variable(var_name)
+                    var_shape = var.get_shape().as_list()
+                    #print('shapes', saved_shapes.keys())
+                    if saved_var_name in saved_shapes:# and var_shape == saved_shapes[saved_var_name]:
+                        restore_vars.append(var)
+                        print('restored', var_name)
+                    break
+    saver = tf.train.Saver(restore_vars)
+    '''
     saver = tf.train.Saver()
-
     return self._create_restore_fn(checkpoint_path, saver)
 
   def build_graph_from_proto(self, graph_def_file, saver_def_file,
