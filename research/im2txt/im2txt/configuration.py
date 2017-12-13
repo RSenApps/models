@@ -89,6 +89,7 @@ class TrainingConfig(object):
     # Optimizer for training the model.
     #self.optimizer = "SGD"
     self.optimizer = "Adam"
+
     # Learning rate for the initial phase of training.
     #self.initial_learning_rate = 2.0
     self.initial_learning_rate = .1
