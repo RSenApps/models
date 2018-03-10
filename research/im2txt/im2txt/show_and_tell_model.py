@@ -368,11 +368,8 @@ class ShowAndTellModel(object):
         biases_initializer=None,
         scope=scope)
       '''
-<<<<<<< HEAD
       image_embeddings = tf.Variable(tf.random_uniform([self.config.batch_size, self.config.embedding_size], minval = -5, maxval = 5), name="image_embedding")
-=======
-      image_embeddings = tf.Variable(tf.random_uniform([self.config.batch_size, self.config.embedding_size]), name="image_embedding")
->>>>>>> 77eff60dcebd62d08d25d5a7fb47d7f9473196c2
+      #image_embeddings = tf.Variable(tf.random_uniform([self.config.batch_size, self.config.embedding_size]), name="image_embedding")
 
 
     # Save the embedding size in the graph.
